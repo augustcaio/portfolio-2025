@@ -22,13 +22,24 @@ export default function LanguageFilter({
 }: LanguageFilterProps) {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
 
-  // Extrair todas as linguagens únicas dos projetos
-  const languages = [
-    "all",
-    ...Array.from(
-      new Set(projects.map((p) => p.language).filter((lang) => lang !== null))
-    ),
-  ] as string[];
+  // Extrair todas as linguagens únicas dos projetos (incluindo todas as linguagens de cada projeto)
+  const allLanguages = new Set<string>();
+
+  projects.forEach((project) => {
+    // Adicionar linguagem principal se existir
+    if (project.language) {
+      allLanguages.add(project.language);
+    }
+
+    // Adicionar todas as linguagens do objeto languages
+    if (project.languages && Object.keys(project.languages).length > 0) {
+      Object.keys(project.languages).forEach((lang) => {
+        allLanguages.add(lang);
+      });
+    }
+  });
+
+  const languages = ["all", ...Array.from(allLanguages).sort()] as string[];
 
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language);
@@ -36,17 +47,27 @@ export default function LanguageFilter({
     if (language === "all") {
       onFilterChange(projects);
     } else {
-      const filteredProjects = projects.filter(
-        (project) => project.language === language
-      );
+      const filteredProjects = projects.filter((project) => {
+        // Verificar se a linguagem principal corresponde
+        if (project.language === language) {
+          return true;
+        }
+
+        // Verificar se a linguagem está presente no objeto languages
+        if (project.languages && project.languages[language]) {
+          return true;
+        }
+
+        return false;
+      });
       onFilterChange(filteredProjects);
     }
   };
 
   return (
-    <motion.div 
-      className="flex items-center space-x-2" 
-      role="group" 
+    <motion.div
+      className="flex items-center space-x-2"
+      role="group"
       aria-labelledby="language-filter-label"
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
@@ -55,13 +76,10 @@ export default function LanguageFilter({
       <label id="language-filter-label" className="sr-only">
         Filtrar projetos por linguagem de programação
       </label>
-      <motion.div
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
+      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
         <Select value={selectedLanguage} onValueChange={handleLanguageChange}>
-          <SelectTrigger 
-            className="w-full sm:w-[200px] text-sm"
+          <SelectTrigger
+            className="w-full sm:w-[240px] lg:w-[280px] text-sm min-w-0"
             aria-label="Selecionar linguagem para filtrar projetos"
           >
             <SelectValue placeholder="Filtrar por linguagem" />
@@ -72,7 +90,19 @@ export default function LanguageFilter({
                 const count =
                   language === "all"
                     ? projects.length
-                    : projects.filter((p) => p.language === language).length;
+                    : projects.filter((p) => {
+                        // Verificar se a linguagem principal corresponde
+                        if (p.language === language) {
+                          return true;
+                        }
+
+                        // Verificar se a linguagem está presente no objeto languages
+                        if (p.languages && p.languages[language]) {
+                          return true;
+                        }
+
+                        return false;
+                      }).length;
 
                 return (
                   <motion.div
@@ -82,10 +112,12 @@ export default function LanguageFilter({
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <SelectItem 
-                      value={language} 
+                    <SelectItem
+                      value={language}
                       className="text-sm"
-                      aria-label={`${language === "all" ? "Todas as linguagens" : language} - ${count} projetos`}
+                      aria-label={`${
+                        language === "all" ? "Todas as linguagens" : language
+                      } - ${count} projetos`}
                     >
                       {language === "all"
                         ? `Todas as linguagens (${count})`
