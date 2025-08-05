@@ -114,9 +114,9 @@ export async function fetchProjects(): Promise<Project[]> {
   try {
     console.log("🌐 Conectando com a API local...");
 
-    // Criar um controller para timeout
+    // Criar um controller para timeout otimizado
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos de timeout
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 segundos de timeout
 
     // Usar a API local que tem fallback robusto
     const res = await fetch("/api/projects", {

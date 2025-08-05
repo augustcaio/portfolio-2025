@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { Home, FolderOpen, Mail } from "lucide-react";
+import { Home, FolderOpen, Mail, Github, Linkedin } from "lucide-react";
 import ThemeToggle from "./theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +15,19 @@ const navigation = [
   { name: "Início", href: "/", icon: Home },
   { name: "Projetos", href: "/projetos", icon: FolderOpen },
   { name: "Contato", href: "/contato", icon: Mail },
+];
+
+const socialLinks = [
+  {
+    name: "GitHub",
+    href: "https://github.com/augustcaio",
+    icon: Github,
+  },
+  {
+    name: "LinkedIn",
+    href: "https://linkedin.com/in/augustcaio",
+    icon: Linkedin,
+  },
 ];
 
 export default function FloatingSidebar() {
@@ -61,6 +74,35 @@ export default function FloatingSidebar() {
                 </Tooltip>
               );
             })}
+
+            {/* Separador */}
+            <div className="w-6 h-px bg-border my-2"></div>
+
+            {/* Social Links */}
+            {socialLinks.map((link) => (
+              <Tooltip key={link.name} delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    asChild
+                    className="h-10 w-10 rounded-full transition-all duration-200 hover:bg-muted/50"
+                  >
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={link.name}
+                    >
+                      <link.icon className="h-4 w-4" />
+                    </a>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right" sideOffset={8}>
+                  <p>{link.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
 
             {/* Theme Toggle */}
             <Tooltip delayDuration={300}>
@@ -109,6 +151,35 @@ export default function FloatingSidebar() {
                 </Tooltip>
               );
             })}
+
+            {/* Separador */}
+            <div className="w-4 h-px bg-border mx-1"></div>
+
+            {/* Social Links for Mobile */}
+            {socialLinks.map((link) => (
+              <Tooltip key={link.name} delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    asChild
+                    className="h-8 w-8 rounded-full transition-all duration-200 hover:bg-muted/50"
+                  >
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={link.name}
+                    >
+                      <link.icon className="h-4 w-4" />
+                    </a>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={8}>
+                  <p>{link.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
 
             {/* Theme Toggle for Mobile */}
             <Tooltip delayDuration={300}>

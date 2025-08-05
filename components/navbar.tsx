@@ -16,7 +16,7 @@ export default function Navbar() {
     <nav className="flex items-center space-x-8">
       <Link href="/" className="flex items-center space-x-2">
         <div>
-          <span className="text-xl font-bold text-gray-900 dark:text-white">
+          <span className="text-xl font-bold text-foreground">
             Augusto Caio
           </span>
         </div>
@@ -32,13 +32,13 @@ export default function Navbar() {
               href={item.href}
               className={`relative px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                 isActive
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {item.name}
               {isActive && (
-                <div className="absolute inset-0 bg-blue-100 dark:bg-blue-900/20 rounded-md" />
+                <div className="absolute inset-0 bg-primary/10 rounded-md" />
               )}
             </Link>
           );

@@ -31,49 +31,39 @@ export default function ContactForm() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
       {/* Informações de Contato */}
       <div>
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
+        <h2 className="text-2xl font-semibold text-foreground mb-6">
           Informações de Contato
         </h2>
         <div className="space-y-6">
           <div className="flex items-center space-x-4">
             <div className="flex-shrink-0">
-              <Mail className="h-6 w-6 text-blue-600" />
+              <Mail className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                Email
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                contato@portfolio.com
-              </p>
+              <h3 className="text-lg font-medium text-foreground">Email</h3>
+              <p className="text-muted-foreground">contato@portfolio.com</p>
             </div>
           </div>
 
           <div className="flex items-center space-x-4">
             <div className="flex-shrink-0">
-              <Phone className="h-6 w-6 text-blue-600" />
+              <Phone className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                Telefone
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                +55 (11) 99999-9999
-              </p>
+              <h3 className="text-lg font-medium text-foreground">Telefone</h3>
+              <p className="text-muted-foreground">+55 (11) 99999-9999</p>
             </div>
           </div>
 
           <div className="flex items-center space-x-4">
             <div className="flex-shrink-0">
-              <MapPin className="h-6 w-6 text-blue-600" />
+              <MapPin className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              <h3 className="text-lg font-medium text-foreground">
                 Localização
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                São Paulo, SP - Brasil
-              </p>
+              <p className="text-muted-foreground">São Paulo, SP - Brasil</p>
             </div>
           </div>
         </div>
@@ -81,14 +71,14 @@ export default function ContactForm() {
 
       {/* Formulário de Contato */}
       <div>
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
+        <h2 className="text-2xl font-semibold text-foreground mb-6">
           Envie uma Mensagem
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
               htmlFor="nome"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              className="block text-sm font-medium text-foreground mb-2"
             >
               Nome
             </label>
@@ -99,7 +89,7 @@ export default function ContactForm() {
               value={formData.nome}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+              className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-input text-foreground"
               placeholder="Seu nome completo"
             />
           </div>
@@ -107,7 +97,7 @@ export default function ContactForm() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              className="block text-sm font-medium text-foreground mb-2"
             >
               Email
             </label>
@@ -118,7 +108,7 @@ export default function ContactForm() {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+              className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-input text-foreground"
               placeholder="seu@email.com"
             />
           </div>
@@ -126,7 +116,7 @@ export default function ContactForm() {
           <div>
             <label
               htmlFor="mensagem"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              className="block text-sm font-medium text-foreground mb-2"
             >
               Mensagem
             </label>
@@ -137,14 +127,14 @@ export default function ContactForm() {
               onChange={handleChange}
               required
               rows={5}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+              className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-input text-foreground"
               placeholder="Sua mensagem..."
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
           >
             <Send className="h-5 w-5" />
             <span>Enviar Mensagem</span>

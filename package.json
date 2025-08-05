@@ -12,6 +12,8 @@
     "test:accessibility": "npx axe-core http://localhost:3001/projetos --save results/accessibility-report.json"
   },
   "dependencies": {
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-select": "^2.2.5",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.2.7",
@@ -24,6 +26,7 @@
     "puppeteer": "^24.15.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "resend": "^4.8.0",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {

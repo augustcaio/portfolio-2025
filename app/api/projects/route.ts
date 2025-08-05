@@ -1,32 +1,77 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Project } from "@/lib/api";
 
-// Função para buscar linguagens de um repositório específico
+// Função simplificada para buscar linguagens apenas da API oficial do GitHub
 async function fetchRepositoryLanguages(
   owner: string,
-  repo: string
+  repo: string,
+  mainLanguage?: string | null
 ): Promise<{ [key: string]: number }> {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 segundos
+
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/languages`,
       {
         method: "GET",
         cache: "no-store",
+        signal: controller.signal,
         headers: {
           Accept: "application/vnd.github.v3+json",
           "User-Agent": "portfolio-2025",
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
         },
       }
     );
 
+    clearTimeout(timeoutId);
+
     if (response.ok) {
-      return await response.json();
+      const languages = await response.json();
+      console.log(`✅ Linguagens para ${owner}/${repo}:`, languages);
+      return languages;
     }
   } catch (error) {
-    console.error(`❌ Erro ao buscar linguagens para ${owner}/${repo}:`, error);
+    console.log(`⚠️ Erro ao buscar linguagens para ${owner}/${repo}`);
   }
 
-  return {};
+  // Fallback mais realista baseado na linguagem principal
+  console.log(
+    `⚠️ Usando fallback para ${owner}/${repo} - linguagem principal: ${mainLanguage}`
+  );
+
+  if (mainLanguage) {
+    const fallbackLanguages: { [key: string]: number } = {
+      [mainLanguage]: 75,
+    };
+
+    // Adicionar linguagens comuns baseadas na linguagem principal
+    if (mainLanguage === "TypeScript" || mainLanguage === "JavaScript") {
+      fallbackLanguages["HTML"] = 15;
+      fallbackLanguages["CSS"] = 10;
+    } else if (mainLanguage === "Python") {
+      fallbackLanguages["Markdown"] = 15;
+      fallbackLanguages["Shell"] = 10;
+    } else if (mainLanguage === "Vue") {
+      fallbackLanguages["JavaScript"] = 15;
+      fallbackLanguages["CSS"] = 10;
+    } else {
+      fallbackLanguages["HTML"] = 15;
+      fallbackLanguages["CSS"] = 10;
+    }
+
+    console.log(`📝 Fallback para ${owner}/${repo}:`, fallbackLanguages);
+    return fallbackLanguages;
+  } else {
+    const defaultFallback = {
+      JavaScript: 70,
+      HTML: 20,
+      CSS: 10,
+    };
+    console.log(`📝 Fallback padrão para ${owner}/${repo}:`, defaultFallback);
+    return defaultFallback;
+  }
 }
 
 // Dados de fallback para quando a API estiver indisponível
@@ -115,126 +160,84 @@ const fallbackProjects: Project[] = [
 
 export async function GET(request: NextRequest) {
   try {
-    console.log("🌐 API local: Tentando buscar projetos do GitHub...");
-
-    // Primeiro, tentar a API externa customizada
-    const externalApiUrl =
-      "https://git-api-i3y5.onrender.com/api/v1/users/augustcaio/repositories";
+    console.log("🚀 Buscando projetos da API oficial do GitHub...");
+    console.log(
+      "🔑 Token disponível:",
+      process.env.GITHUB_TOKEN ? "Sim" : "Não"
+    );
+    console.log(
+      "🔑 Token (primeiros 10 chars):",
+      process.env.GITHUB_TOKEN
+        ? process.env.GITHUB_TOKEN.substring(0, 10) + "..."
+        : "Não encontrado"
+    );
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segundos de timeout
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos
 
-    try {
-      const response = await fetch(externalApiUrl, {
+    const response = await fetch(
+      "https://api.github.com/users/augustcaio/repos?sort=updated&per_page=8",
+      {
         method: "GET",
         cache: "no-store",
         signal: controller.signal,
         headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log(
-          `✅ API externa funcionando! ${data.length} repositórios encontrados`
-        );
-
-        // Converter os dados para o formato esperado e buscar linguagens
-        const projectsPromises = data.map(async (repo: any) => {
-          // Buscar linguagens do repositório
-          const languages = await fetchRepositoryLanguages(
-            "augustcaio",
-            repo.name
-          );
-
-          return {
-            id: repo.id,
-            name: repo.name,
-            description: repo.description,
-            html_url: `https://github.com/${repo.full_name}`,
-            homepage: repo.homepage,
-            language: repo.language,
-            languages: languages,
-            stargazers_count: repo.stargazers_count,
-            forks_count: repo.forks_count,
-            updated_at: repo.updated_at,
-            topics: repo.topics || [],
-          };
-        });
-
-        const projects = await Promise.all(projectsPromises);
-
-        return NextResponse.json(projects, { status: 200 });
-      }
-    } catch (externalError) {
-      console.error("❌ Erro na API externa:", externalError);
-      clearTimeout(timeoutId);
-    }
-
-    // Se a API externa falhar, tentar a API oficial do GitHub
-    console.log("🔄 Tentando API oficial do GitHub...");
-
-    const githubApiUrl =
-      "https://api.github.com/users/augustcaio/repos?sort=updated&per_page=10";
-
-    try {
-      const githubResponse = await fetch(githubApiUrl, {
-        method: "GET",
-        cache: "no-store",
-        headers: {
           Accept: "application/vnd.github.v3+json",
           "User-Agent": "portfolio-2025",
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
         },
-      });
+      }
+    );
 
-      if (githubResponse.ok) {
-        const githubData = await githubResponse.json();
-        console.log(
-          `✅ GitHub API funcionando! ${githubData.length} repositórios encontrados`
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log(`✅ ${data.length} repositórios encontrados`);
+
+      // Processar apenas os primeiros 6 projetos para máxima velocidade
+      const projectsPromises = data.slice(0, 6).map(async (repo: any) => {
+        const languages = await fetchRepositoryLanguages(
+          "augustcaio",
+          repo.name,
+          repo.language
         );
 
-        // Converter os dados para o formato esperado e buscar linguagens
-        const projectsPromises = githubData.map(async (repo: any) => {
-          // Buscar linguagens do repositório
-          const languages = await fetchRepositoryLanguages(
-            "augustcaio",
-            repo.name
-          );
+        return {
+          id: repo.id,
+          name: repo.name,
+          description: repo.description,
+          html_url: repo.html_url,
+          homepage: repo.homepage,
+          language: repo.language,
+          languages: languages,
+          stargazers_count: repo.stargazers_count,
+          forks_count: repo.forks_count,
+          updated_at: repo.updated_at,
+          topics: repo.topics || [],
+        };
+      });
 
-          return {
-            id: repo.id,
-            name: repo.name,
-            description: repo.description,
-            html_url: repo.html_url,
-            homepage: repo.homepage,
-            language: repo.language,
-            languages: languages,
-            stargazers_count: repo.stargazers_count,
-            forks_count: repo.forks_count,
-            updated_at: repo.updated_at,
-            topics: repo.topics || [],
-          };
-        });
-
-        const projects = await Promise.all(projectsPromises);
-
-        return NextResponse.json(projects, { status: 200 });
-      }
-    } catch (githubError) {
-      console.error("❌ Erro na GitHub API:", githubError);
+      const projects = await Promise.all(projectsPromises);
+      console.log("📦 Projetos processados com sucesso");
+      console.log(
+        "🔍 Dados finais dos projetos:",
+        projects.map((p) => ({ name: p.name, languages: p.languages }))
+      );
+      return NextResponse.json(projects, { status: 200 });
+    } else {
+      console.log(
+        `❌ GitHub API retornou status ${response.status} - usando dados de fallback`
+      );
+      // Retornar dados de fallback em vez de erro
+      return NextResponse.json(fallbackProjects, { status: 200 });
     }
-
-    // Se ambas as APIs falharem, usar dados de fallback
-    console.log("🔄 Usando dados de fallback...");
-    return NextResponse.json(fallbackProjects, { status: 200 });
   } catch (error) {
-    console.error("❌ Erro geral na API local:", error);
-
-    // Em caso de erro, sempre retornar dados de fallback
+    console.error(
+      "❌ Erro ao buscar projetos - usando dados de fallback:",
+      error
+    );
+    // Retornar dados de fallback em vez de erro
     return NextResponse.json(fallbackProjects, { status: 200 });
   }
 }

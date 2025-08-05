@@ -10,15 +10,19 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const pathname = usePathname();
+  const isHomePage = pathname === "/";
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      <div className="flex flex-col min-h-screen">
+    <div className="h-screen bg-background transition-colors duration-300 overflow-hidden">
+      <div className="flex flex-col h-full">
         {/* Floating Sidebar */}
         <FloatingSidebar />
 
         <AnimatePresence mode="wait" initial={false}>
-          <main key={pathname} className="flex-grow">
+          <main
+            key={pathname}
+            className={`flex-1 ${isHomePage ? "overflow-hidden" : "overflow-y-auto"}`}
+          >
             {children}
           </main>
         </AnimatePresence>

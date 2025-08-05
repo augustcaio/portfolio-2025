@@ -1,50 +1,43 @@
-import { Github, Linkedin, Mail } from "lucide-react";
+import { motion } from "framer-motion";
+import GitHubStats from "./github-stats";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
-  const socialLinks = [
-    {
-      name: "GitHub",
-      href: "https://github.com/augustcaio",
-      icon: Github,
-    },
-    {
-      name: "LinkedIn",
-      href: "https://linkedin.com/in/augustcaio",
-      icon: Linkedin,
-    },
-    {
-      name: "Email",
-      href: "mailto:contato@augustcaio.com",
-      icon: Mail,
-    },
-  ];
-
   return (
-    <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <div className="text-center md:text-left">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+    <footer className="bg-muted h-[80px] lg:h-[100px] lg:flex items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-4 w-full">
+        <div className="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
+          {/* Estatísticas do GitHub */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              duration: 0.6,
+              ease: [0.4, 0.0, 0.2, 1],
+            }}
+          >
+            <GitHubStats />
+          </motion.div>
+
+          {/* Copyright */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              delay: 0.2,
+              duration: 0.6,
+              ease: [0.4, 0.0, 0.2, 1],
+            }}
+            className="text-center lg:text-right"
+          >
+            <p className="text-xs lg:text-sm text-muted-foreground">
               © {currentYear} Augusto Caio. Todos os direitos reservados.
             </p>
-          </div>
-
-          <div className="flex items-center space-x-6">
-            {socialLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
-                aria-label={link.name}
-              >
-                <link.icon className="h-5 w-5" aria-hidden="true" />
-              </a>
-            ))}
-          </div>
+            <p className="text-xs text-muted-foreground mt-1 hidden lg:block">
+              Desenvolvido com Next.js, TypeScript e Tailwind CSS
+            </p>
+          </motion.div>
         </div>
       </div>
     </footer>

@@ -16,6 +16,21 @@ import AnimatedLoader from "@/components/animated-loader";
 import PageTransition from "@/components/page-transition";
 import { usePathname } from "next/navigation";
 
+// Componente wrapper para renderização apenas no cliente
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  if (!hasMounted) {
+    return <ProjectsSkeleton />;
+  }
+
+  return <>{children}</>;
+}
+
 function ProjectsList() {
   const pathname = usePathname();
   const [projects, setProjects] = useState<Project[]>([]);
@@ -32,10 +47,50 @@ function ProjectsList() {
     try {
       setLoading(true);
       setUsingFallback(false);
-      console.log("🔄 Carregando projetos da API local...");
+
+      // Mostrar loading imediatamente
+      console.log("🔄 [CLIENT] Carregando projetos da API local...");
+
+      // Verificar cache local (5 minutos) - apenas se localStorage estiver disponível
+      const cacheKey = "projects-cache";
+      if (
+        typeof window !== "undefined" &&
+        typeof localStorage !== "undefined"
+      ) {
+        const cachedData = localStorage.getItem(cacheKey);
+        const cacheTime = localStorage.getItem("projects-cache-time");
+
+        if (cachedData && cacheTime) {
+          const cacheAge = Date.now() - parseInt(cacheTime);
+          if (cacheAge < 5 * 60 * 1000) {
+            // 5 minutos
+            console.log("✅ [CLIENT] Usando dados do cache local");
+            const data = JSON.parse(cachedData);
+            setProjects(data);
+            setFilteredProjects(data);
+            setDisplayedProjects(data.slice(0, projectsPerPage));
+            setLastFetch(Date.now());
+            setLoading(false);
+            return;
+          }
+        }
+      }
 
       const data = await fetchProjects();
-      console.log(`✅ ${data.length} projetos carregados com sucesso`);
+      console.log(`✅ [CLIENT] ${data.length} projetos carregados com sucesso`);
+      console.log(
+        "🔍 [CLIENT] Dados dos projetos:",
+        data.map((p) => ({ name: p.name, languages: p.languages }))
+      );
+
+      // Salvar no cache local - apenas se localStorage estiver disponível
+      if (
+        typeof window !== "undefined" &&
+        typeof localStorage !== "undefined"
+      ) {
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+        localStorage.setItem("projects-cache-time", Date.now().toString());
+      }
 
       // Verificar se está usando dados de fallback (baseado no primeiro projeto)
       const isUsingFallback =
@@ -46,10 +101,10 @@ function ProjectsList() {
 
       if (isUsingFallback) {
         console.log(
-          "⚠️ Usando dados de fallback - APIs externas indisponíveis"
+          "⚠️ [CLIENT] Usando dados de fallback - APIs externas indisponíveis"
         );
       } else {
-        console.log("✅ Usando dados reais das APIs");
+        console.log("✅ [CLIENT] Usando dados reais das APIs");
       }
 
       setProjects(data);
@@ -57,12 +112,12 @@ function ProjectsList() {
       setDisplayedProjects(data.slice(0, projectsPerPage));
       setLastFetch(Date.now());
     } catch (error) {
-      console.error("❌ Erro ao carregar projetos:", error);
+      console.error("❌ [CLIENT] Erro ao carregar projetos:", error);
       setUsingFallback(true);
 
       // Garantir que sempre temos dados para mostrar
       if (projects.length === 0) {
-        console.log("🔄 Aplicando dados de fallback após erro...");
+        console.log("🔄 [CLIENT] Aplicando dados de fallback após erro...");
         const fallbackData: Project[] = [
           {
             id: 1,
@@ -102,14 +157,17 @@ function ProjectsList() {
     }
   };
 
-  // Carregar projetos quando o componente for montado
+  // Carregar projetos quando o componente for montado (apenas no cliente)
   useEffect(() => {
-    loadProjects();
+    // Garantir que estamos no cliente antes de executar
+    if (typeof window !== "undefined") {
+      loadProjects();
+    }
   }, []); // Array de dependências vazio garante que só execute uma vez por montagem
 
   // Carregar projetos sempre que o usuário navegar para esta página
   useEffect(() => {
-    if (pathname === "/projetos") {
+    if (typeof window !== "undefined" && pathname === "/projetos") {
       console.log(
         "📍 Usuário navegou para a página de projetos - carregando dados frescos"
       );
@@ -119,7 +177,14 @@ function ProjectsList() {
 
   // Função para recarregar projetos manualmente
   const refreshProjects = async () => {
-    console.log("🔄 Recarregando projetos manualmente...");
+    console.log("🔄 [CLIENT] Recarregando projetos manualmente...");
+
+    // Limpar cache local - apenas se localStorage estiver disponível
+    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+      localStorage.removeItem("projects-cache");
+      localStorage.removeItem("projects-cache-time");
+    }
+
     await loadProjects();
     setCurrentPage(1); // Reset para a primeira página
   };
@@ -166,47 +231,71 @@ function ProjectsList() {
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
             <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 lg:space-x-6">
               <div className="w-full sm:w-48 lg:w-56 flex-shrink-0">
-                <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-                  <span>Projetos (0)</span>
-                  {loading && (
-                    <span className="ml-2 text-sm text-blue-600 dark:text-blue-400">
-                      🔄 Carregando...
-                    </span>
-                  )}
-                  {usingFallback && !loading && (
-                    <span className="ml-2 text-sm text-orange-600 dark:text-orange-400">
-                      ⚠️ Modo offline
-                    </span>
-                  )}
-                </h2>
+                <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                  <div className="flex items-center space-x-2">
+                    <h2 className="text-sm sm:text-base font-semibold text-foreground">
+                      <span>Projetos (0)</span>
+                      {loading && (
+                        <span className="ml-2 text-sm text-primary">
+                          🔄 Carregando...
+                        </span>
+                      )}
+                      {usingFallback && !loading && (
+                        <span className="ml-2 text-sm text-destructive">
+                          ⚠️ Modo offline
+                        </span>
+                      )}
+                    </h2>
+
+                    {/* Separador vertical */}
+                    <div className="hidden sm:block w-px h-6 bg-border"></div>
+
+                    {/* Botão de Refresh - agora ao lado do título no mobile */}
+                    <div className="flex-shrink-0 sm:hidden">
+                      <Button
+                        onClick={refreshProjects}
+                        disabled={loading}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center space-x-1 px-1.5 py-0.5 h-6 text-xs bg-card border-border text-card-foreground"
+                      >
+                        <RefreshCw
+                          className={`h-2.5 w-2.5 ${loading ? "animate-spin" : ""}`}
+                        />
+                        <span>{loading ? "..." : "Atualizar"}</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
                 {lastFetch > 0 && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Última atualização:{" "}
                     {new Date(lastFetch).toLocaleTimeString("pt-BR")}
                     {usingFallback && (
-                      <span className="ml-1 text-orange-500">
+                      <span className="ml-1 text-destructive">
                         (dados de exemplo)
                       </span>
                     )}
                   </p>
                 )}
               </div>
-              <div className="flex flex-row items-center space-x-3">
-                <div className="flex-shrink-0">
+              <div className="w-full sm:flex sm:flex-row sm:items-center sm:space-x-3">
+                <div className="w-full sm:flex-shrink-0 sm:w-auto">
                   <LanguageFilter
                     projects={projects}
                     onFilterChange={handleFilterChange}
                   />
                 </div>
 
-                {/* Botão de Refresh */}
-                <div className="flex-shrink-0">
+                {/* Botão de Refresh - visível apenas em desktop */}
+                <div className="flex-shrink-0 hidden sm:block">
                   <Button
                     onClick={refreshProjects}
                     disabled={loading}
                     variant="outline"
                     size="sm"
-                    className="flex items-center space-x-2"
+                    className="flex items-center space-x-2 bg-card border-border text-card-foreground"
                   >
                     <RefreshCw
                       className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
@@ -229,17 +318,17 @@ function ProjectsList() {
         >
           <div className="max-w-md mx-auto px-4">
             <motion.div
-              className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center"
+              className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 bg-muted rounded-full flex items-center justify-center"
               aria-hidden="true"
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             >
-              <Code className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
+              <Code className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
             </motion.div>
-            <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">
               Nenhum projeto encontrado
             </h3>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
+            <p className="text-sm sm:text-base text-muted-foreground">
               {projects.length === 0
                 ? "Não foi possível carregar os projetos no momento."
                 : "Não há projetos para a linguagem selecionada."}
@@ -318,49 +407,73 @@ function ProjectsList() {
         >
           <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 lg:space-x-6">
             <div className="w-full sm:w-48 lg:w-56 flex-shrink-0">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-                <span>
-                  Projetos ({displayedProjects.length} de {totalProjects})
-                </span>
-                {loading && (
-                  <span className="ml-2 text-sm text-blue-600 dark:text-blue-400">
-                    🔄 Carregando...
-                  </span>
-                )}
-                {usingFallback && !loading && (
-                  <span className="ml-2 text-sm text-orange-600 dark:text-orange-400">
-                    ⚠️ Modo offline
-                  </span>
-                )}
-              </h2>
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                <div className="flex items-center space-x-2">
+                  <h2 className="text-sm sm:text-base font-semibold text-foreground">
+                    <span>
+                      Projetos ({displayedProjects.length} de {totalProjects})
+                    </span>
+                    {loading && (
+                      <span className="ml-2 text-sm text-primary">
+                        🔄 Carregando...
+                      </span>
+                    )}
+                    {usingFallback && !loading && (
+                      <span className="ml-2 text-sm text-destructive">
+                        ⚠️ Modo offline
+                      </span>
+                    )}
+                  </h2>
+
+                  {/* Separador vertical */}
+                  <div className="hidden sm:block w-px h-6 bg-border"></div>
+
+                  {/* Botão de Refresh - agora ao lado do título no mobile */}
+                  <div className="flex-shrink-0 sm:hidden">
+                    <Button
+                      onClick={refreshProjects}
+                      disabled={loading}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center space-x-1 px-1.5 py-0.5 h-6 text-xs bg-card border-border text-card-foreground"
+                    >
+                      <RefreshCw
+                        className={`h-2.5 w-2.5 ${loading ? "animate-spin" : ""}`}
+                      />
+                      <span>{loading ? "..." : "Atualizar"}</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
               {lastFetch > 0 && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Última atualização:{" "}
                   {new Date(lastFetch).toLocaleTimeString("pt-BR")}
                   {usingFallback && (
-                    <span className="ml-1 text-orange-500">
+                    <span className="ml-1 text-destructive">
                       (dados de exemplo)
                     </span>
                   )}
                 </p>
               )}
             </div>
-            <div className="flex flex-row items-center space-x-3">
-              <div className="flex-shrink-0">
+            <div className="w-full sm:flex sm:flex-row sm:items-center sm:space-x-3">
+              <div className="w-full sm:flex-shrink-0 sm:w-auto">
                 <LanguageFilter
                   projects={projects}
                   onFilterChange={handleFilterChange}
                 />
               </div>
 
-              {/* Botão de Refresh */}
-              <div className="flex-shrink-0">
+              {/* Botão de Refresh - visível apenas em desktop */}
+              <div className="flex-shrink-0 hidden sm:block">
                 <Button
                   onClick={refreshProjects}
                   disabled={loading}
                   variant="outline"
                   size="sm"
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-2 bg-card border-border text-card-foreground"
                 >
                   <RefreshCw
                     className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
@@ -375,14 +488,14 @@ function ProjectsList() {
         {/* Mensagem de modo offline */}
         {usingFallback && !loading && (
           <motion.div
-            className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-3 mb-6"
+            className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 mb-6"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.3 }}
           >
             <div className="flex items-center space-x-2">
-              <span className="text-orange-600 dark:text-orange-400">⚠️</span>
-              <p className="text-sm text-orange-800 dark:text-orange-200">
+              <span className="text-destructive">⚠️</span>
+              <p className="text-sm text-destructive/90">
                 <strong>Modo offline:</strong> As APIs externas estão
                 temporariamente indisponíveis. Exibindo dados de exemplo. Tente
                 atualizar mais tarde.
@@ -404,7 +517,7 @@ function ProjectsList() {
             Estatísticas dos projetos
           </h3>
           <motion.div
-            className="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-700"
+            className="bg-card rounded-lg p-3 sm:p-4 border border-border"
             role="region"
             aria-label="Total de projetos"
             variants={itemVariants}
@@ -413,19 +526,19 @@ function ProjectsList() {
           >
             <div className="flex items-center space-x-2">
               <Github
-                className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500"
+                className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
                 aria-hidden="true"
               />
-              <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+              <span className="text-xs sm:text-sm text-muted-foreground">
                 Total de Projetos
               </span>
             </div>
-            <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-1">
+            <p className="text-xl sm:text-2xl font-bold text-card-foreground mt-1">
               {totalProjects}
             </p>
           </motion.div>
           <motion.div
-            className="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-700"
+            className="bg-card rounded-lg p-3 sm:p-4 border border-border"
             role="region"
             aria-label="Total de estrelas"
             variants={itemVariants}
@@ -434,19 +547,19 @@ function ProjectsList() {
           >
             <div className="flex items-center space-x-2">
               <Calendar
-                className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500"
+                className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
                 aria-hidden="true"
               />
-              <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+              <span className="text-xs sm:text-sm text-muted-foreground">
                 Total de Stars
               </span>
             </div>
-            <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-1">
+            <p className="text-xl sm:text-2xl font-bold text-card-foreground mt-1">
               {totalStars}
             </p>
           </motion.div>
           <motion.div
-            className="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-700 sm:col-span-2 lg:col-span-1"
+            className="bg-card rounded-lg p-3 sm:p-4 border border-border sm:col-span-2 lg:col-span-1"
             role="region"
             aria-label="Linguagens utilizadas"
             variants={itemVariants}
@@ -455,10 +568,10 @@ function ProjectsList() {
           >
             <div className="flex items-center space-x-2">
               <Code
-                className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500"
+                className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
                 aria-hidden="true"
               />
-              <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+              <span className="text-xs sm:text-sm text-muted-foreground">
                 Linguagens
               </span>
             </div>
@@ -603,7 +716,7 @@ export default function Projetos() {
       <Layout>
         <PageTransition>
           <motion.main
-            className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12"
+            className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-20 sm:pb-12"
             initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
@@ -619,7 +732,7 @@ export default function Projetos() {
               }}
             >
               <motion.h1
-                className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4"
+                className="text-3xl sm:text-4xl font-bold text-foreground mb-3 sm:mb-4"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{
@@ -632,7 +745,9 @@ export default function Projetos() {
               </motion.h1>
             </motion.header>
 
-            <ProjectsList />
+            <ClientOnly>
+              <ProjectsList />
+            </ClientOnly>
           </motion.main>
         </PageTransition>
       </Layout>

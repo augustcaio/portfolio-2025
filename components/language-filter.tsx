@@ -79,7 +79,7 @@ export default function LanguageFilter({
       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
         <Select value={selectedLanguage} onValueChange={handleLanguageChange}>
           <SelectTrigger
-            className="w-full sm:w-[240px] lg:w-[280px] text-sm min-w-0"
+            className="w-full text-sm min-w-0 bg-card border-border text-card-foreground"
             aria-label="Selecionar linguagem para filtrar projetos"
           >
             <SelectValue placeholder="Filtrar por linguagem" />
