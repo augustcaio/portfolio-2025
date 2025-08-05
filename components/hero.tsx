@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import TypingEffect from "./typing-effect";
+import GitHubStats from "./github-stats";
 
 interface GitHubUser {
   avatar_url: string;
@@ -146,167 +147,246 @@ export default function Hero() {
   }
 
   return (
-    <div className="h-full flex items-center justify-center bg-background px-4">
-      <div className="flex flex-col items-center justify-center gap-4 w-full max-w-4xl h-full mt-64 lg:mt-96">
-        {/* Desktop Layout - Horizontal */}
-        <div className="hidden lg:flex items-center gap-8">
-          {/* Avatar com animação de entrada */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{
-              duration: 0.8,
-              ease: [0.4, 0.0, 0.2, 1],
-              delay: 0.2,
-            }}
-            whileHover={{
-              scale: 1.05,
-              transition: { duration: 0.3 },
-            }}
-            className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden shadow-lg bg-muted"
-          >
-            {!imageError && userData?.avatar_url ? (
-              <Image
-                src={userData.avatar_url}
-                alt="Foto de perfil"
-                fill
-                className="object-cover"
-                priority
-                onError={handleImageError}
-                unoptimized
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                <svg
-                  className="w-16 h-16"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            )}
-          </motion.div>
-
-          <div className="flex flex-col">
-            {/* Nome com animação de entrada */}
-            <motion.h1
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{
-                duration: 0.8,
-                ease: [0.4, 0.0, 0.2, 1],
-                delay: 0.6,
-              }}
-              className="text-4xl sm:text-6xl font-bold text-foreground"
-              style={{ fontFamily: '"Google Sans Code", monospace' }}
-            >
-              Caio Augusto
-            </motion.h1>
-
-            {/* Typing effect com animação de entrada */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.8,
-                ease: [0.4, 0.0, 0.2, 1],
-                delay: 1.0,
-              }}
-              className="mt-4"
-            >
-              <TypingEffect
-                phrases={phrases}
-                speed={80}
-                className="text-xl sm:text-2xl text-muted-foreground"
-                style={{ fontFamily: '"Google Sans Code", monospace' }}
-              />
-            </motion.div>
-          </div>
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* GitHub Stats - Topo no Mobile, Final no Desktop */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.8,
+          ease: [0.4, 0.0, 0.2, 1],
+          delay: 1.5,
+        }}
+        className="flex-shrink-0 py-8 px-4 order-first lg:order-last"
+      >
+        <div className="max-w-7xl mx-auto">
+          <GitHubStats />
         </div>
+      </motion.div>
 
-        {/* Mobile Layout - Vertical */}
-        <div className="lg:hidden flex flex-col items-center gap-6 text-center">
-          {/* Avatar mobile com animação de entrada */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{
-              duration: 0.8,
-              ease: [0.4, 0.0, 0.2, 1],
-              delay: 0.2,
-            }}
-            whileHover={{
-              scale: 1.05,
-              transition: { duration: 0.3 },
-            }}
-            className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden shadow-lg bg-muted"
-          >
-            {!imageError && userData?.avatar_url ? (
-              <Image
-                src={userData.avatar_url}
-                alt="Foto de perfil"
-                fill
-                className="object-cover"
-                priority
-                onError={handleImageError}
-                unoptimized
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                <svg
-                  className="w-12 h-12"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            )}
-          </motion.div>
-
-          <div className="flex flex-col items-center gap-3">
-            {/* Nome mobile com animação de entrada */}
-            <motion.h1
-              initial={{ opacity: 0, y: -30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.8,
-                ease: [0.4, 0.0, 0.2, 1],
-                delay: 0.6,
-              }}
-              className="text-3xl sm:text-4xl font-bold text-foreground"
-              style={{ fontFamily: '"Google Sans Code", monospace' }}
-            >
-              Caio Augusto
-            </motion.h1>
-
-            {/* Typing effect mobile com animação de entrada */}
+      {/* Hero Section - Centralizado */}
+      <div className="flex-1 flex items-center justify-center px-4 order-last lg:order-first">
+        <div className="flex flex-col items-center justify-center gap-4 w-full max-w-4xl">
+          {/* Desktop Layout - Horizontal */}
+          <div className="hidden lg:flex items-center gap-8">
+            {/* Avatar com animação de entrada melhorada */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.8, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{
-                duration: 0.8,
+                duration: 1.0,
                 ease: [0.4, 0.0, 0.2, 1],
-                delay: 1.0,
+                delay: 0.1,
               }}
-              className="mt-2"
+              whileHover={{
+                scale: 1.05,
+                y: -5,
+                transition: { duration: 0.3, ease: "easeOut" },
+              }}
+              whileTap={{
+                scale: 0.98,
+                transition: { duration: 0.1 },
+              }}
+              className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden shadow-2xl bg-muted group"
+              style={{
+                boxShadow:
+                  "0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1)",
+              }}
             >
-              <TypingEffect
-                phrases={phrases}
-                speed={80}
-                className="text-lg sm:text-xl text-muted-foreground"
-                style={{ fontFamily: '"Google Sans Code", monospace' }}
+              {/* Efeito de brilho no hover */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                initial={{ x: "-100%", y: "-100%" }}
+                whileHover={{ x: "100%", y: "100%" }}
+                transition={{ duration: 0.6, ease: "easeInOut" }}
               />
+
+              {!imageError && userData?.avatar_url ? (
+                <motion.div
+                  initial={{ scale: 1.1, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  whileHover={{ scale: 1.05 }}
+                  className="w-full h-full"
+                >
+                  <Image
+                    src={userData.avatar_url}
+                    alt="Foto de perfil"
+                    fill
+                    className="object-cover transition-transform duration-300"
+                    priority
+                    onError={handleImageError}
+                    unoptimized
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  className="w-full h-full flex items-center justify-center text-muted-foreground"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <svg
+                    className="w-16 h-16"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </motion.div>
+              )}
             </motion.div>
+
+            <div className="flex flex-col">
+              {/* Nome com animação de entrada */}
+              <motion.h1
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.4, 0.0, 0.2, 1],
+                  delay: 0.6,
+                }}
+                className="text-4xl sm:text-6xl font-bold text-foreground"
+                style={{ fontFamily: '"Google Sans Code", monospace' }}
+              >
+                Caio Augusto
+              </motion.h1>
+
+              {/* Typing effect com animação de entrada */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.4, 0.0, 0.2, 1],
+                  delay: 1.0,
+                }}
+                className="mt-4"
+              >
+                <TypingEffect
+                  phrases={phrases}
+                  speed={80}
+                  className="text-xl sm:text-2xl text-muted-foreground"
+                  style={{ fontFamily: '"Google Sans Code", monospace' }}
+                />
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Mobile Layout - Vertical */}
+          <div className="lg:hidden flex flex-col items-center gap-6 text-center">
+            {/* Avatar mobile com animação de entrada melhorada */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{
+                duration: 1.0,
+                ease: [0.4, 0.0, 0.2, 1],
+                delay: 0.1,
+              }}
+              whileHover={{
+                scale: 1.05,
+                y: -3,
+                transition: { duration: 0.3, ease: "easeOut" },
+              }}
+              whileTap={{
+                scale: 0.98,
+                transition: { duration: 0.1 },
+              }}
+              className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden shadow-2xl bg-muted group"
+              style={{
+                boxShadow:
+                  "0 15px 30px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1)",
+              }}
+            >
+              {/* Efeito de brilho no hover */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                initial={{ x: "-100%", y: "-100%" }}
+                whileHover={{ x: "100%", y: "100%" }}
+                transition={{ duration: 0.6, ease: "easeInOut" }}
+              />
+
+              {!imageError && userData?.avatar_url ? (
+                <motion.div
+                  initial={{ scale: 1.1, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  whileHover={{ scale: 1.05 }}
+                  className="w-full h-full"
+                >
+                  <Image
+                    src={userData.avatar_url}
+                    alt="Foto de perfil"
+                    fill
+                    className="object-cover transition-transform duration-300"
+                    priority
+                    onError={handleImageError}
+                    unoptimized
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  className="w-full h-full flex items-center justify-center text-muted-foreground"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <svg
+                    className="w-12 h-12"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </motion.div>
+              )}
+            </motion.div>
+
+            <div className="flex flex-col items-center gap-3">
+              {/* Nome mobile com animação de entrada */}
+              <motion.h1
+                initial={{ opacity: 0, y: -30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.4, 0.0, 0.2, 1],
+                  delay: 0.6,
+                }}
+                className="text-3xl sm:text-4xl font-bold text-foreground"
+                style={{ fontFamily: '"Google Sans Code", monospace' }}
+              >
+                Caio Augusto
+              </motion.h1>
+
+              {/* Typing effect mobile com animação de entrada */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.4, 0.0, 0.2, 1],
+                  delay: 1.0,
+                }}
+                className="mt-2"
+              >
+                <TypingEffect
+                  phrases={phrases}
+                  speed={80}
+                  className="text-lg sm:text-xl text-muted-foreground"
+                  style={{ fontFamily: '"Google Sans Code", monospace' }}
+                />
+              </motion.div>
+            </div>
           </div>
         </div>
       </div>

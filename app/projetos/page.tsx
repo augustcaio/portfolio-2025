@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AnimatedLoader from "@/components/animated-loader";
 import PageTransition from "@/components/page-transition";
 import { usePathname } from "next/navigation";
+import GitHubStats from "@/components/github-stats";
 
 // Componente wrapper para renderização apenas no cliente
 function ClientOnly({ children }: { children: React.ReactNode }) {
@@ -713,14 +714,26 @@ export default function Projetos() {
         <link rel="canonical" href="https://seu-dominio.com/projetos" />
       </Head>
 
-      <Layout>
-        <PageTransition>
-          <motion.main
-            className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-20 sm:pb-12"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
+      <div className="min-h-screen flex flex-col bg-background">
+        {/* GitHub Stats - Topo no Mobile, Final no Desktop */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.8,
+            ease: [0.4, 0.0, 0.2, 1],
+            delay: 1.5,
+          }}
+          className="flex-shrink-0 py-8 px-4 order-first lg:order-last"
+        >
+          <div className="max-w-7xl mx-auto">
+            <GitHubStats />
+          </div>
+        </motion.div>
+
+        {/* Conteúdo Principal - Centralizado */}
+        <div className="flex-1 flex flex-col px-4 order-last lg:order-first">
+          <div className="max-w-7xl mx-auto w-full py-8 sm:py-12 pb-20 sm:pb-12">
             <motion.header
               className="text-center mb-8 sm:mb-12"
               initial={{ opacity: 0, y: -20 }}
@@ -748,9 +761,9 @@ export default function Projetos() {
             <ClientOnly>
               <ProjectsList />
             </ClientOnly>
-          </motion.main>
-        </PageTransition>
-      </Layout>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

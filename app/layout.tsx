@@ -23,7 +23,7 @@ export default function RootLayout({
       <head>
         <ThemeScript />
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <TooltipProvider>
           <ThemeProvider>
             <Layout>{children}</Layout>
