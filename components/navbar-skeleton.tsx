@@ -5,21 +5,21 @@ export default function NavbarSkeleton() {
         <div className="flex justify-between items-center h-16">
           {/* Logo Skeleton */}
           <div className="flex-shrink-0">
-            <div className="w-24 h-6 bg-muted rounded animate-pulse" />
+            <div className="w-24 h-6 bg-muted rounded" />
           </div>
 
           {/* Desktop Navigation Skeleton */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              <div className="w-12 h-4 bg-muted rounded animate-pulse" />
-              <div className="w-16 h-4 bg-muted rounded animate-pulse" />
-              <div className="w-14 h-4 bg-muted rounded animate-pulse" />
+              <div className="w-12 h-4 bg-muted rounded" />
+              <div className="w-16 h-4 bg-muted rounded" />
+              <div className="w-14 h-4 bg-muted rounded" />
             </div>
           </div>
 
           {/* Mobile menu button Skeleton */}
           <div className="md:hidden">
-            <div className="w-6 h-6 bg-muted rounded animate-pulse" />
+            <div className="w-6 h-6 bg-muted rounded" />
           </div>
         </div>
       </div>

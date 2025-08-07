@@ -93,7 +93,7 @@ export default function ThemeToggle({
         {theme === "light" ? (
           <motion.div
             key="moon"
-            initial={{ x: 20, opacity: 0 }}
+            initial={false}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -20, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
@@ -104,7 +104,7 @@ export default function ThemeToggle({
         ) : (
           <motion.div
             key="sun"
-            initial={{ x: 20, opacity: 0 }}
+            initial={false}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -20, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}

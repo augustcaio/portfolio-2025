@@ -9,7 +9,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Project } from "@/lib/api";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface LanguageFilterProps {
   projects: Project[];
@@ -65,18 +64,15 @@ export default function LanguageFilter({
   };
 
   return (
-    <motion.div
+    <div
       className="flex items-center space-x-2"
       role="group"
       aria-labelledby="language-filter-label"
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
     >
       <label id="language-filter-label" className="sr-only">
         Filtrar projetos por linguagem de programação
       </label>
-      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+      <div>
         <Select value={selectedLanguage} onValueChange={handleLanguageChange}>
           <SelectTrigger
             className="w-full text-sm min-w-0 bg-card border-border text-card-foreground"
@@ -85,7 +81,7 @@ export default function LanguageFilter({
             <SelectValue placeholder="Filtrar por linguagem" />
           </SelectTrigger>
           <SelectContent>
-            <AnimatePresence>
+            <>
               {languages.map((language, index) => {
                 const count =
                   language === "all"
@@ -105,13 +101,7 @@ export default function LanguageFilter({
                       }).length;
 
                 return (
-                  <motion.div
-                    key={language}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
+                  <div key={language}>
                     <SelectItem
                       value={language}
                       className="text-sm"
@@ -123,13 +113,13 @@ export default function LanguageFilter({
                         ? `Todas as linguagens (${count})`
                         : `${language} (${count})`}
                     </SelectItem>
-                  </motion.div>
+                  </div>
                 );
               })}
-            </AnimatePresence>
+            </>
           </SelectContent>
         </Select>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

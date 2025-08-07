@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { Github, Users, Star, GitFork, Calendar } from "lucide-react";
 
 interface GitHubStats {
@@ -78,14 +77,14 @@ export default function GitHubStats() {
         <div className="flex items-center space-x-6 lg:space-x-8">
           {statsItems.map((item, index) => (
             <div key={item.label} className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-muted rounded animate-pulse"></div>
-              <div className="w-8 h-4 bg-muted rounded animate-pulse"></div>
+              <div className="w-4 h-4 bg-muted rounded"></div>
+              <div className="w-8 h-4 bg-muted rounded"></div>
             </div>
           ))}
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-muted rounded animate-pulse"></div>
-          <div className="w-20 h-4 bg-muted rounded animate-pulse"></div>
+          <div className="w-4 h-4 bg-muted rounded"></div>
+          <div className="w-20 h-4 bg-muted rounded"></div>
         </div>
       </div>
     );
@@ -100,17 +99,7 @@ export default function GitHubStats() {
       {/* Estatísticas em linha única */}
       <div className="flex items-center space-x-6 lg:space-x-8">
         {statsItems.map((item, index) => (
-          <motion.div
-            key={item.label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: index * 0.1,
-              duration: 0.5,
-              ease: [0.4, 0.0, 0.2, 1],
-            }}
-            className="flex items-center space-x-2 group"
-          >
+          <div key={item.label} className="flex items-center space-x-2 group">
             <item.icon
               className={`h-4 w-4 ${item.color} group-hover:scale-110 transition-transform duration-200`}
             />
@@ -120,25 +109,16 @@ export default function GitHubStats() {
             <span className="text-xs text-muted-foreground hidden sm:inline">
               {item.label}
             </span>
-          </motion.div>
+          </div>
         ))}
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          delay: 0.4,
-          duration: 0.5,
-          ease: [0.4, 0.0, 0.2, 1],
-        }}
-        className="flex items-center space-x-2 text-muted-foreground"
-      >
+      <div className="flex items-center space-x-2 text-muted-foreground">
         <Calendar className="h-4 w-4" />
         <span className="text-xs">
           Atualizado {new Date(stats.updated_at).toLocaleDateString("pt-BR")}
         </span>
-      </motion.div>
+      </div>
     </div>
   );
 }

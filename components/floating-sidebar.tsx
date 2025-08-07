@@ -10,6 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 const navigation = [
   { name: "Início", href: "/", icon: Home },
@@ -43,7 +44,12 @@ export default function FloatingSidebar() {
   return (
     <>
       {/* Desktop Sidebar - Lado Esquerdo */}
-      <div className="hidden lg:block fixed left-6 top-1/2 transform -translate-y-1/2 z-50">
+      <motion.div
+        className="hidden lg:block fixed left-6 top-1/2 transform -translate-y-1/2 z-50"
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.7, ease: [0.4, 0.0, 0.2, 1], delay: 0.5 }}
+      >
         <div className="bg-background/80 backdrop-blur-sm rounded-full shadow-lg border p-2">
           <div className="flex flex-col items-center space-y-1">
             {/* Navigation Links */}
@@ -118,10 +124,15 @@ export default function FloatingSidebar() {
             </Tooltip>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Mobile Bottom Bar */}
-      <div className="lg:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+      <motion.div
+        className="lg:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.7, ease: [0.4, 0.0, 0.2, 1], delay: 0.5 }}
+      >
         <div className="bg-background/90 backdrop-blur-sm rounded-full shadow-lg border px-3 py-1.5">
           <div className="flex items-center space-x-1">
             {navigation.map((item) => {
@@ -195,7 +206,7 @@ export default function FloatingSidebar() {
             </Tooltip>
           </div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }

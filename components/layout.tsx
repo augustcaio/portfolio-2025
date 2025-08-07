@@ -1,7 +1,6 @@
 "use client";
 
 import FloatingSidebar from "./floating-sidebar";
-import { AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 
 interface LayoutProps {
@@ -18,14 +17,11 @@ export default function Layout({ children }: LayoutProps) {
         {/* Floating Sidebar */}
         <FloatingSidebar />
 
-        <AnimatePresence mode="wait" initial={false}>
-          <main
-            key={pathname}
-            className={`flex-1 ${isHomePage ? "overflow-hidden" : "overflow-y-auto"}`}
-          >
-            {children}
-          </main>
-        </AnimatePresence>
+        <main
+          className={`flex-1 ${isHomePage ? "overflow-hidden" : "overflow-y-auto"}`}
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

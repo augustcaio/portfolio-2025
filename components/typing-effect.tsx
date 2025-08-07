@@ -59,7 +59,7 @@ export default function TypingEffect({
   return (
     <span className={className} style={style}>
       {displayText}
-      <span className="animate-pulse">|</span>
+      <span>|</span>
     </span>
   );
 }

@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
   className?: string;
@@ -18,15 +16,7 @@ export default function LoadingSpinner({
   };
 
   return (
-    <motion.div
-      className={`${sizeClasses[size]} ${className}`}
-      animate={{ rotate: 360 }}
-      transition={{
-        duration: 1,
-        repeat: Infinity,
-        ease: "linear",
-      }}
-    >
+    <div className={`${sizeClasses[size]} ${className}`}>
       <svg
         className="w-full h-full"
         viewBox="0 0 24 24"
@@ -44,7 +34,7 @@ export default function LoadingSpinner({
           strokeDashoffset="31.416"
           className="opacity-25"
         />
-        <motion.circle
+        <circle
           cx="12"
           cy="12"
           r="10"
@@ -52,17 +42,9 @@ export default function LoadingSpinner({
           strokeWidth="2"
           strokeLinecap="round"
           strokeDasharray="31.416"
-          strokeDashoffset="31.416"
-          animate={{
-            strokeDashoffset: 0,
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          strokeDashoffset="15.708"
         />
       </svg>
-    </motion.div>
+    </div>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { ReactNode } from "react";
 
 interface PageTransitionProps {
@@ -12,18 +11,5 @@ export default function PageTransition({
   children,
   className = "",
 }: PageTransitionProps) {
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -15 }}
-      transition={{
-        duration: 0.4,
-        ease: [0.4, 0.0, 0.2, 1], // Curva de easing suave
-      }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className={className}>{children}</div>;
 }

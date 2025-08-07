@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Github, Star, GitFork, Calendar, ExternalLink } from "lucide-react";
 import { Project } from "@/lib/api";
-import { motion } from "framer-motion";
 import AnimatedLoader from "./animated-loader";
 
 interface ProjectCardProps {
@@ -29,28 +28,11 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.5,
-        delay: index * 0.1,
-        ease: "easeOut",
-      }}
-      whileHover={{
-        y: -8,
-        transition: { duration: 0.2 },
-      }}
-      className="h-full"
-    >
+    <div className="h-full">
       <Card className="h-full flex flex-col hover:shadow-xl transition-all duration-300 border-border group min-h-[180px]">
         <CardHeader className="pb-0 flex-shrink-0 p-3">
           <div className="flex items-start justify-between">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-              className="flex-1 pr-2"
-            >
+            <div className="flex-1 pr-2">
               <CardTitle className="text-base font-bold text-card-foreground line-clamp-2 leading-tight">
                 {project.name
                   .replace(/[-_]/g, " ")
@@ -61,12 +43,8 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                   )
                   .join(" ")}
               </CardTitle>
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex-shrink-0"
-            >
+            </div>
+            <div className="flex-shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
@@ -82,19 +60,14 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                   <Github className="h-3 w-3" aria-hidden="true" />
                 </a>
               </Button>
-            </motion.div>
+            </div>
           </div>
           {project.description && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="mt-1"
-            >
+            <div className="mt-1">
               <CardDescription className="text-xs text-muted-foreground line-clamp-1 leading-relaxed">
                 {project.description}
               </CardDescription>
-            </motion.div>
+            </div>
           )}
         </CardHeader>
 
@@ -157,11 +130,7 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
 
         <CardFooter className="pt-0 flex-shrink-0 p-3">
           <div className="flex flex-col sm:flex-row gap-2 w-full">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex-1"
-            >
+            <div className="flex-1">
               <Button
                 asChild
                 variant="outline"
@@ -177,13 +146,9 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                   Ver Código
                 </a>
               </Button>
-            </motion.div>
+            </div>
             {project.homepage && (
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex-1"
-              >
+              <div className="flex-1">
                 <Button
                   asChild
                   variant="default"
@@ -199,11 +164,11 @@ export default function ProjectCard({ project, index = 0 }: ProjectCardProps) {
                     Demo
                   </a>
                 </Button>
-              </motion.div>
+              </div>
             )}
           </div>
         </CardFooter>
       </Card>
-    </motion.div>
+    </div>
   );
 }
