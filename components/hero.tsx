@@ -147,7 +147,7 @@ export default function Hero() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background lg:justify-center">
       {/* GitHub Stats - Topo no Mobile, Final no Desktop */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -166,7 +166,7 @@ export default function Hero() {
 
       {/* Hero Section - Centralizado */}
       <div className="flex-1 flex items-center justify-center px-4 order-last lg:order-first">
-        <div className="flex flex-col items-center justify-center gap-4 w-full max-w-4xl">
+        <div className="flex flex-col items-center justify-center gap-4 w-full max-w-4xl -translate-y-12 lg:translate-y-0">
           {/* Desktop Layout - Horizontal */}
           <div className="hidden lg:flex items-center gap-8">
             {/* Avatar com animação de entrada melhorada */}

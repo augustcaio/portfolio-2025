@@ -1,0 +1,5 @@
+[33mcommit 50e0a013d369243e3d19d4a935bf42ec2d340158[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/develop[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mdevelop[m[33m)[m
+Author: augustcaio <caioaugusto930@gmail.com>
+Date:   Thu Aug 7 18:58:49 2025 -0300
+
+    Remove ESLint configuration file, update package dependencies by removing unused ESLint packages, and refine UI components by eliminating unnecessary motion animations for improved performance and simplicity.
