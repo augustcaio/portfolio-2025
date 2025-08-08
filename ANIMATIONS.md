@@ -62,13 +62,15 @@ const containerVariants = {
 };
 ```
 
-### 3. LanguageFilter
-**Arquivo**: `components/language-filter.tsx`
+### 3. TechFilter
+**Arquivo**: `components/tech-filter.tsx`
 
 **Animações implementadas**:
-- **Container**: Slide-in da direita
-- **Select**: Escala no hover
-- **Opções**: Fade-in escalonado
+- **Container**: Fade-in com animação staggered dos ícones
+- **Ícones**: Escala e fade-in individual com delay
+- **Hover**: Transições suaves de cores e escala
+- **Seleção**: Animação de estado ativo
+- **Texto de filtro**: Slide-in quando um filtro é aplicado
 
 ### 4. ProjectsSkeleton
 **Arquivo**: `components/projects-skeleton.tsx`

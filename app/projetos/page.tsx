@@ -6,10 +6,10 @@ import ProjectsSkeleton from "@/components/projects-skeleton";
 import { fetchProjects } from "@/lib/api";
 import { Suspense, useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Github, Calendar, Code, RefreshCw } from "lucide-react";
-import LanguageFilter from "@/components/language-filter";
+import { Github, Calendar, Code } from "lucide-react";
+import TechFilter from "@/components/tech-filter";
 import { Project } from "@/lib/api";
-import { Button } from "@/components/ui/button";
+
 import Head from "next/head";
 import AnimatedLoader from "@/components/animated-loader";
 import PageTransition from "@/components/page-transition";
@@ -44,12 +44,15 @@ function ProjectsList() {
   const [usingFallback, setUsingFallback] = useState(false);
   const projectsPerPage = 6;
 
-  const loadProjects = async () => {
+  const loadProjects = async (isAutoRefresh = false) => {
     try {
-      setLoading(true);
+      // Durante auto-refresh, não mostrar loading skeleton
+      if (!isAutoRefresh) {
+        setLoading(true);
+      }
       setUsingFallback(false);
 
-      // Mostrar loading imediatamente
+      // Mostrar loading imediatamente apenas se não for auto-refresh
       console.log("🔄 [CLIENT] Carregando projetos da API local...");
 
       // Verificar cache local (5 minutos) - apenas se localStorage estiver disponível
@@ -154,7 +157,10 @@ function ProjectsList() {
         setDisplayedProjects(fallbackData.slice(0, projectsPerPage));
       }
     } finally {
-      setLoading(false);
+      // Durante auto-refresh, não alterar o estado de loading
+      if (!isAutoRefresh) {
+        setLoading(false);
+      }
     }
   };
 
@@ -176,19 +182,24 @@ function ProjectsList() {
     }
   }, [pathname]); // Executa sempre que o pathname mudar
 
-  // Função para recarregar projetos manualmente
-  const refreshProjects = async () => {
-    console.log("🔄 [CLIENT] Recarregando projetos manualmente...");
+  // Auto-refresh a cada 1 minuto (60000ms) - sempre ativo
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-    // Limpar cache local - apenas se localStorage estiver disponível
-    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
-      localStorage.removeItem("projects-cache");
-      localStorage.removeItem("projects-cache-time");
-    }
+    console.log(
+      "⏰ [AUTO-REFRESH] Configurando refresh automático a cada 1 minuto"
+    );
 
-    await loadProjects();
-    setCurrentPage(1); // Reset para a primeira página
-  };
+    const intervalId = setInterval(() => {
+      console.log("🔄 [AUTO-REFRESH] Atualizando projetos automaticamente...");
+      loadProjects(true); // true indica que é um auto-refresh
+    }, 60000); // 1 minuto
+
+    return () => {
+      console.log("⏰ [AUTO-REFRESH] Limpando interval do auto-refresh");
+      clearInterval(intervalId);
+    };
+  }, []); // Array vazio = executa apenas uma vez ao montar
 
   const handleFilterChange = (filtered: Project[]) => {
     setFilteredProjects(filtered);
@@ -223,49 +234,28 @@ function ProjectsList() {
       <div className="space-y-6 sm:space-y-8">
         {/* Container com largura fixa para todo o conteúdo */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Filtro por Linguagem */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 lg:space-x-6">
-              <div className="w-full sm:w-48 lg:w-56 flex-shrink-0">
-                <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-                  <div className="flex items-center space-x-2">
-                    <h2 className="text-sm sm:text-base font-semibold text-foreground">
-                      <span>Projetos (0)</span>
-                      {loading && (
-                        <span className="ml-2 text-sm text-primary">
-                          🔄 Carregando...
-                        </span>
-                      )}
-                      {usingFallback && !loading && (
-                        <span className="ml-2 text-sm text-destructive">
-                          ⚠️ Modo offline
-                        </span>
-                      )}
-                    </h2>
-
-                    {/* Separador vertical */}
-                    <div className="hidden sm:block w-px h-6 bg-border"></div>
-
-                    {/* Botão de Refresh - agora ao lado do título no mobile */}
-                    <div className="flex-shrink-0 sm:hidden">
-                      <Button
-                        onClick={refreshProjects}
-                        disabled={loading}
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center space-x-1 px-1.5 py-0.5 h-6 text-xs bg-card border-border text-card-foreground"
-                      >
-                        <RefreshCw className={`h-2.5 w-2.5`} />
-                        <span>{loading ? "..." : "Atualizar"}</span>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
+          {/* Cabeçalho dos Projetos */}
+          <div className="flex flex-col space-y-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm sm:text-base font-semibold text-foreground">
+                  <span>Projetos (0)</span>
+                  {loading && (
+                    <span className="ml-2 text-sm text-primary">
+                      🔄 Carregando...
+                    </span>
+                  )}
+                  {usingFallback && !loading && (
+                    <span className="ml-2 text-sm text-destructive">
+                      ⚠️ Modo offline
+                    </span>
+                  )}
+                </h2>
                 {lastFetch > 0 && (
                   <p className="text-xs text-muted-foreground mt-1">
                     Última atualização:{" "}
                     {new Date(lastFetch).toLocaleTimeString("pt-BR")}
+
                     {usingFallback && (
                       <span className="ml-1 text-destructive">
                         (dados de exemplo)
@@ -274,28 +264,14 @@ function ProjectsList() {
                   </p>
                 )}
               </div>
-              <div className="w-full sm:flex sm:flex-row sm:items-center sm:space-x-3">
-                <div className="w-full sm:flex-shrink-0 sm:w-auto">
-                  <LanguageFilter
-                    projects={projects}
-                    onFilterChange={handleFilterChange}
-                  />
-                </div>
+            </div>
 
-                {/* Botão de Refresh - visível apenas em desktop */}
-                <div className="flex-shrink-0 hidden sm:block">
-                  <Button
-                    onClick={refreshProjects}
-                    disabled={loading}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center space-x-2 bg-card border-border text-card-foreground"
-                  >
-                    <RefreshCw className={`h-4 w-4`} />
-                    <span>{loading ? "Carregando..." : "Atualizar"}</span>
-                  </Button>
-                </div>
-              </div>
+            {/* Filtro de Tecnologias */}
+            <div className="w-full">
+              <TechFilter
+                projects={projects}
+                onFilterChange={handleFilterChange}
+              />
             </div>
           </div>
         </div>
@@ -381,81 +357,46 @@ function ProjectsList() {
         transition={{ duration: 0.5, delay: 0.4 }}
         className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
       >
-        {/* Filtro por Linguagem */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
-          <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 lg:space-x-6">
-            <div className="w-full sm:w-48 lg:w-56 flex-shrink-0">
-              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-                <div className="flex items-center space-x-2">
-                  <h2 className="text-sm sm:text-base font-semibold text-foreground">
-                    <span>
-                      Projetos ({displayedProjects.length} de {totalProjects})
-                    </span>
-                    {loading && (
-                      <span className="ml-2 text-sm text-primary">
-                        🔄 Carregando...
-                      </span>
-                    )}
-                    {usingFallback && !loading && (
-                      <span className="ml-2 text-sm text-destructive">
-                        ⚠️ Modo offline
-                      </span>
-                    )}
-                  </h2>
-
-                  {/* Separador vertical */}
-                  <div className="hidden sm:block w-px h-6 bg-border"></div>
-
-                  {/* Botão de Refresh - agora ao lado do título no mobile */}
-                  <div className="flex-shrink-0 sm:hidden">
-                    <Button
-                      onClick={refreshProjects}
-                      disabled={loading}
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center space-x-1 px-1.5 py-0.5 h-6 text-xs bg-card border-border text-card-foreground"
-                    >
-                      <RefreshCw className={`h-2.5 w-2.5`} />
-                      <span>{loading ? "..." : "Atualizar"}</span>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
+        {/* Cabeçalho dos Projetos */}
+        <div className="flex flex-col space-y-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm sm:text-base font-semibold text-foreground">
+                <span>
+                  Projetos ({displayedProjects.length} de {totalProjects})
+                </span>
+                {loading && (
+                  <span className="ml-2 text-sm text-primary">
+                    🔄 Carregando...
+                  </span>
+                )}
+                {usingFallback && !loading && (
+                  <span className="ml-2 text-sm text-destructive">
+                    ⚠️ Modo offline
+                  </span>
+                )}
+              </h2>
               {lastFetch > 0 && (
                 <p className="text-xs text-muted-foreground mt-1">
                   Última atualização:{" "}
                   {new Date(lastFetch).toLocaleTimeString("pt-BR")}
+
                   {usingFallback && (
                     <span className="ml-1 text-destructive">
                       (dados de exemplo)
                     </span>
                   )}
                 </p>
-              )}
-            </div>
-            <div className="w-full sm:flex sm:flex-row sm:items-center sm:space-x-3">
-              <div className="w-full sm:flex-shrink-0 sm:w-auto">
-                <LanguageFilter
-                  projects={projects}
-                  onFilterChange={handleFilterChange}
-                />
+                              )}
               </div>
+            </div>
 
-              {/* Botão de Refresh - visível apenas em desktop */}
-              <div className="flex-shrink-0 hidden sm:block">
-                <Button
-                  onClick={refreshProjects}
-                  disabled={loading}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center space-x-2 bg-card border-border text-card-foreground"
-                >
-                  <RefreshCw className={`h-4 w-4`} />
-                  <span>{loading ? "Carregando..." : "Atualizar"}</span>
-                </Button>
-              </div>
-            </div>
+          {/* Filtro de Tecnologias */}
+          <div className="w-full">
+            <TechFilter
+              projects={projects}
+              onFilterChange={handleFilterChange}
+            />
           </div>
         </div>
       </motion.div>
@@ -475,138 +416,142 @@ function ProjectsList() {
       )}
 
       {/* Estatísticas */}
-      <motion.section
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
-        aria-labelledby="stats-heading"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-6 sm:mt-8"
-      >
-        <h3 id="stats-heading" className="sr-only">
-          Estatísticas dos projetos
-        </h3>
-        <div
-          className="bg-card rounded-lg p-3 sm:p-4 border border-border"
-          role="region"
-          aria-label="Total de projetos"
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.section
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          aria-labelledby="stats-heading"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-6 sm:mt-8"
         >
-          <div className="flex items-center space-x-2">
-            <Github
-              className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <span className="text-xs sm:text-sm text-muted-foreground">
-              Total de Projetos
-            </span>
+          <h3 id="stats-heading" className="sr-only">
+            Estatísticas dos projetos
+          </h3>
+          <div
+            className="bg-card rounded-lg p-3 sm:p-4 border border-border"
+            role="region"
+            aria-label="Total de projetos"
+          >
+            <div className="flex items-center space-x-2">
+              <Github
+                className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <span className="text-xs sm:text-sm text-muted-foreground">
+                Total de Projetos
+              </span>
+            </div>
+            <p className="text-xl sm:text-2xl font-bold text-card-foreground mt-1">
+              {totalProjects}
+            </p>
           </div>
-          <p className="text-xl sm:text-2xl font-bold text-card-foreground mt-1">
-            {totalProjects}
-          </p>
-        </div>
-        <div
-          className="bg-card rounded-lg p-3 sm:p-4 border border-border"
-          role="region"
-          aria-label="Total de estrelas"
-        >
-          <div className="flex items-center space-x-2">
-            <Calendar
-              className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <span className="text-xs sm:text-sm text-muted-foreground">
-              Total de Stars
-            </span>
+          <div
+            className="bg-card rounded-lg p-3 sm:p-4 border border-border"
+            role="region"
+            aria-label="Total de estrelas"
+          >
+            <div className="flex items-center space-x-2">
+              <Calendar
+                className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <span className="text-xs sm:text-sm text-muted-foreground">
+                Total de Stars
+              </span>
+            </div>
+            <p className="text-xl sm:text-2xl font-bold text-card-foreground mt-1">
+              {totalStars}
+            </p>
           </div>
-          <p className="text-xl sm:text-2xl font-bold text-card-foreground mt-1">
-            {totalStars}
-          </p>
-        </div>
-        <div
-          className="bg-card rounded-lg p-3 sm:p-4 border border-border sm:col-span-2 lg:col-span-1"
-          role="region"
-          aria-label="Linguagens utilizadas"
-        >
-          <div className="flex items-center space-x-2">
-            <Code
-              className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <span className="text-xs sm:text-sm text-muted-foreground">
-              Linguagens
-            </span>
+          <div
+            className="bg-card rounded-lg p-3 sm:p-4 border border-border sm:col-span-2 lg:col-span-1"
+            role="region"
+            aria-label="Linguagens utilizadas"
+          >
+            <div className="flex items-center space-x-2">
+              <Code
+                className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <span className="text-xs sm:text-sm text-muted-foreground">
+                Linguagens
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {languages.slice(0, 3).map((lang) => (
+                <Badge key={lang} variant="secondary" className="text-xs">
+                  {lang}
+                </Badge>
+              ))}
+              {languages.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{languages.length - 3}
+                </Badge>
+              )}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-1 mt-1">
-            {languages.slice(0, 3).map((lang) => (
-              <Badge key={lang} variant="secondary" className="text-xs">
-                {lang}
-              </Badge>
-            ))}
-            {languages.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{languages.length - 3}
-              </Badge>
-            )}
-          </div>
-        </div>
-      </motion.section>
+        </motion.section>
+      </div>
 
       {/* Lista de Projetos */}
-      <section aria-labelledby="projects-heading" className="mt-6 sm:mt-8">
-        <h3 id="projects-heading" className="sr-only">
-          Lista de projetos
-        </h3>
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <AnimatePresence>
-            {displayedProjects.map((project, index) => (
-              <motion.div key={project.id} variants={itemVariants}>
-                <ProjectCard project={project} index={index} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
-      </section>
-
-      {/* Botão Carregar Mais */}
-      <AnimatePresence>
-        {hasMoreProjects && (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section aria-labelledby="projects-heading" className="mt-6 sm:mt-8">
+          <h3 id="projects-heading" className="sr-only">
+            Lista de projetos
+          </h3>
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.3 }}
-            className="flex justify-center pt-6 sm:pt-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
           >
-            <div>
-              <Button
-                onClick={loadMoreProjects}
-                disabled={loadingMore}
-                className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base"
-                aria-label={`Carregar mais ${Math.min(
-                  projectsPerPage,
-                  filteredProjects.length - displayedProjects.length
-                )} projetos`}
-              >
-                {loadingMore ? (
-                  <>
-                    <AnimatedLoader size="sm" className="mr-2" />
-                    <span aria-live="polite">Carregando...</span>
-                  </>
-                ) : (
-                  `Carregar mais (${Math.min(
+            <AnimatePresence>
+              {displayedProjects.map((project, index) => (
+                <motion.div key={project.id} variants={itemVariants}>
+                  <ProjectCard project={project} index={index} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        </section>
+
+        {/* Botão Carregar Mais */}
+        <AnimatePresence>
+          {hasMoreProjects && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.3 }}
+              className="flex justify-center pt-6 sm:pt-8"
+            >
+              <div>
+                <Button
+                  onClick={loadMoreProjects}
+                  disabled={loadingMore}
+                  className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base"
+                  aria-label={`Carregar mais ${Math.min(
                     projectsPerPage,
                     filteredProjects.length - displayedProjects.length
-                  )} projetos)`
-                )}
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  )} projetos`}
+                >
+                  {loadingMore ? (
+                    <>
+                      <AnimatedLoader size="sm" className="mr-2" />
+                      <span aria-live="polite">Carregando...</span>
+                    </>
+                  ) : (
+                    `Carregar mais (${Math.min(
+                      projectsPerPage,
+                      filteredProjects.length - displayedProjects.length
+                    )} projetos)`
+                  )}
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
