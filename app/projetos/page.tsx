@@ -6,6 +6,7 @@ import ProjectsSkeleton from "@/components/projects-skeleton";
 import { fetchProjects } from "@/lib/api";
 import { Suspense, useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Github, Calendar, Code } from "lucide-react";
 import TechFilter from "@/components/tech-filter";
 import { Project } from "@/lib/api";
@@ -255,7 +256,6 @@ function ProjectsList() {
                   <p className="text-xs text-muted-foreground mt-1">
                     Última atualização:{" "}
                     {new Date(lastFetch).toLocaleTimeString("pt-BR")}
-
                     {usingFallback && (
                       <span className="ml-1 text-destructive">
                         (dados de exemplo)
@@ -380,16 +380,15 @@ function ProjectsList() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Última atualização:{" "}
                   {new Date(lastFetch).toLocaleTimeString("pt-BR")}
-
                   {usingFallback && (
                     <span className="ml-1 text-destructive">
                       (dados de exemplo)
                     </span>
                   )}
                 </p>
-                              )}
-              </div>
+              )}
             </div>
+          </div>
 
           {/* Filtro de Tecnologias */}
           <div className="w-full">
